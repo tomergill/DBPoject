@@ -15,24 +15,26 @@ public class Temp {
                     "Gill\\Documents\\University\\Databases\\DBPoject\\src/conf.txt");
 
 
-            ResultSet set;
-            set = manager.executeQuery("SHOW TABLES");
+//            ResultSet set;
+            System.out.println(manager.DDLQuery("INSERT INTO `mylt_db`.`students` " +
+                    "(`firstname`, `lastname`, `age`) " +
+                    "VALUES ('tomer', 'gill', '20');"));
 
 
-            System.out.println("*********************");
-            System.out.println(set);
-            System.out.println("*********************\n");
-
-            int cols = set.getMetaData().getColumnCount();
-
-            while (set.next()) {
-                for (int i = 1; i < cols; i++) {
-                    System.out.printf(set.getString(i) + ", ");
-                }
-                System.out.printf(set.getString(cols) + "\n");
-            }
+//            System.out.println("*********************");
+//            System.out.println(set);
+//            System.out.println("*********************\n");
+//
+//            int cols = set.getMetaData().getColumnCount();
+//
+//            while (set.next()) {
+//                for (int i = 1; i < cols; i++) {
+//                    System.out.printf(set.getString(i) + ", ");
+//                }
+//                System.out.printf(set.getString(cols) + "\n");
+//            }
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println(e.toString());
         }
     }
 }
