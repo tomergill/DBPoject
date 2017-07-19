@@ -3,9 +3,13 @@ package DataLogic;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.sql.*;
-import java.util.ArrayList;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.LinkedList;
 import java.util.List;
+import java.sql.DriverManager;
 
 /**
  * Created by Tomer Gill on 06-Jul-17.
@@ -13,7 +17,7 @@ import java.util.List;
 public class DBManager implements IDBManager {
     private Connection con;
     private static List<String> DDLReturnAnswer = null;
-    private static List<String> DMLReturnAnswer = null;
+    private static List<String> DMLAffectingRows = null;
 
     public DBManager(String path) throws IOException, SQLException {
         BufferedReader reader = new BufferedReader(new FileReader(path));
@@ -23,20 +27,24 @@ public class DBManager implements IDBManager {
         this.con = DriverManager.getConnection(url, uname, pass);
 
         if (DDLReturnAnswer == null) {
-            DDLReturnAnswer = new ArrayList<>();
+            DDLReturnAnswer = new LinkedList<>();
             DDLReturnAnswer.add("SHOW");
             DDLReturnAnswer.add("DESCRIBE");
         }
-        if (DMLReturnAnswer == null) {
-            DMLReturnAnswer = new ArrayList<>();
+        if (DMLAffectingRows == null) {
+            DMLAffectingRows = new LinkedList<>();
+            DMLAffectingRows.add("UPDATE");
+            DMLAffectingRows.add("INSERT");
+            DMLAffectingRows.add("DELETE");
+
         }
     }
 
     @Override
     public String DMLQuery(String query) {
 
-        /*boolean answer = false;
-        for (String command : DMLReturnAnswer) {
+        boolean answer = false;
+        for (String command : DMLAffectingRows) {
             if (answer = query.startsWith(command))
                 break;
         }
@@ -47,7 +55,7 @@ public class DBManager implements IDBManager {
             Statement statement = this.con.createStatement();
             result = statement.executeQuery(query);
 
-            if (answer) {
+            if (!answer) { //returns a table
                 StringBuilder table = new StringBuilder("");
                 int colNum = result.getMetaData().getColumnCount();
 
@@ -73,13 +81,14 @@ public class DBManager implements IDBManager {
                         table.append("\n");
                     }
                 }
-            } else {
 
+                return table.toString();
+            } else {
+                return "Rows affected :" + statement.executeUpdate(query) + "\n";
             }
         } catch (SQLException sql) {
             return errMsgFromException(sql);
         }
-*/ return "";
     }
 
     @Override
@@ -144,7 +153,7 @@ public class DBManager implements IDBManager {
         return result;
     }
 
-    public ResultSet executeQuery(String query) throws SQLException {
+    /*public ResultSet executeQuery(String query) throws SQLException {
         Statement statement = con.createStatement();
         return statement.executeQuery(query);
     }
@@ -152,5 +161,5 @@ public class DBManager implements IDBManager {
     public int executeCommand(String query) throws SQLException {
         Statement statement = con.createStatement();
         return statement.executeUpdate(query);
-    }
+    }*/
 }

@@ -16,10 +16,7 @@ public class Temp {
 
 
 //            ResultSet set;
-            System.out.println(manager.DDLQuery("INSERT INTO `mylt_db`.`students` " +
-                    "(`firstname`, `lastname`, `age`) " +
-                    "VALUES ('tomer', 'gill', '20');"));
-
+            System.out.println(manager.DMLQuery("SELECT * FROM students WHERE id = 0"));
 
 //            System.out.println("*********************");
 //            System.out.println(set);
