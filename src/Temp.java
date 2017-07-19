@@ -16,8 +16,7 @@ public class Temp {
 
 
             ResultSet set;
-
-            set = manager.executeQuery("SHOW DATABASES");
+            set = manager.executeQuery("SHOW TABLES");
 
 
             System.out.println("*********************");
@@ -32,7 +31,6 @@ public class Temp {
                 }
                 System.out.printf(set.getString(cols) + "\n");
             }
-
         } catch (Exception e) {
             System.out.println(e);
         }
