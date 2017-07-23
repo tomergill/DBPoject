@@ -98,30 +98,27 @@ public class DBManager implements IDBManager {
     }
 
     @Override
-    public String executeScript(String scriptPath) throws IOException {
+    public List<String> executeScript(String scriptPath) throws IOException {
         Scanner scanner = new Scanner(new File(scriptPath));
         scanner.useDelimiter(";");
 
         String command;
-        StringBuilder answer = new StringBuilder("");
+        List<String> answer = new LinkedList<>();
         while (scanner.hasNext()) {
             command = scanner.next();
             String commandType = command.trim().split(" ")[0];
             try {
                 if (!DMLAffectingRows.contains(commandType) //returns table
                         || DDLReturnAnswer.contains(commandType)) {
-                    answer.append(executeQuery(command));
+                    answer.add(executeQuery(command));
                 } else { //returns number of rows affected
-                    answer.append(executeUpdate(command));
+                    answer.add(executeUpdate(command));
                 }
             } catch (SQLException e) {
-                answer.append(errMsgFromException(e));
-            } finally {
-                if (scanner.hasNext())
-                    answer.append("\n");
+                answer.add(errMsgFromException(e));
             }
         }
-        return answer.toString();
+        return answer;
     }
 
     private String errMsgFromException(SQLException e) {
