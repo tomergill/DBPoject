@@ -1,6 +1,7 @@
 package DataLogic;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
@@ -10,6 +11,7 @@ import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
 import java.sql.DriverManager;
+import java.util.Scanner;
 
 /**
  * Created by Tomer Gill on 06-Jul-17.
@@ -42,49 +44,18 @@ public class DBManager implements IDBManager {
 
     @Override
     public String DMLQuery(String query) {
-
         boolean answer = false;
         for (String command : DMLAffectingRows) {
-            if (answer = query.startsWith(command))
+            if (query.startsWith(command)) {
+                answer = true;
                 break;
+            }
         }
-
-
-        ResultSet result;
         try {
-            Statement statement = this.con.createStatement();
-            result = statement.executeQuery(query);
-
             if (!answer) { //returns a table
-                StringBuilder table = new StringBuilder("");
-                int colNum = result.getMetaData().getColumnCount();
-
-                //put columns headers
-                int i;
-                for (i = 1; i < colNum; i++) {
-                    table.append(result.getMetaData().getColumnName(i));
-                    table.append(",");
-                }
-                if (i == colNum) {
-                    table.append(result.getMetaData().getColumnName(i));
-                    table.append("\n");
-                }
-
-                //get each row's data
-                while (result.next()) {
-                    for (i = 1; i < colNum; i++) {
-                        table.append(result.getString(i));
-                        table.append(",");
-                    }
-                    if (i == colNum){
-                        table.append(result.getString(i));
-                        table.append("\n");
-                    }
-                }
-
-                return table.toString();
+                return executeQuery(query);
             } else {
-                return "Rows affected :" + statement.executeUpdate(query) + "\n";
+                return executeUpdate(query);
             }
         } catch (SQLException sql) {
             return errMsgFromException(sql);
@@ -96,34 +67,18 @@ public class DBManager implements IDBManager {
 
         boolean returnsAnswer = false;
         for (String command : DDLReturnAnswer) {
-            if (returnsAnswer = query.startsWith(command))
+            if (query.startsWith(command))
+            {
+                returnsAnswer = true;
                 break;
+            }
         }
 
         try {
-            Statement statement = this.con.createStatement();
-
             if (returnsAnswer) {
-                ResultSet result = statement.executeQuery(query);
-                StringBuilder info = new StringBuilder("");
-                int colNum = result.getMetaData().getColumnCount();
-
-                //get each row's data
-                int i;
-                while (result.next()) {
-                    for (i = 1; i < colNum; i++) {
-                        info.append(result.getString(i));
-                        info.append(",");
-                    }
-                    if (i == colNum){
-                        info.append(result.getString(i));
-                        info.append("\n");
-                    }
-                }
-
-                return info.toString();
+                return executeQuery(query);
             } else {
-                return "Rows affected :" + statement.executeUpdate(query) + "\n";
+                return executeUpdate(query);
             }
         } catch (SQLException sql) {
             return errMsgFromException(sql);
@@ -142,6 +97,33 @@ public class DBManager implements IDBManager {
         }
     }
 
+    @Override
+    public String executeScript(String scriptPath) throws IOException {
+        Scanner scanner = new Scanner(new File(scriptPath));
+        scanner.useDelimiter(";");
+
+        String command;
+        StringBuilder answer = new StringBuilder("");
+        while (scanner.hasNext()) {
+            command = scanner.next();
+            String commandType = command.trim().split(" ")[0];
+            try {
+                if (!DMLAffectingRows.contains(commandType) //returns table
+                        || DDLReturnAnswer.contains(commandType)) {
+                    answer.append(executeQuery(command));
+                } else { //returns number of rows affected
+                    answer.append(executeUpdate(command));
+                }
+            } catch (SQLException e) {
+                answer.append(errMsgFromException(e));
+            } finally {
+                if (scanner.hasNext())
+                    answer.append("\n");
+            }
+        }
+        return answer.toString();
+    }
+
     private String errMsgFromException(SQLException e) {
         String result;
         if (e.toString().contains("syntax"))
@@ -149,17 +131,45 @@ public class DBManager implements IDBManager {
         else
             result = "LOGICAL ERROR";
 
-        result += "\n" + e.toString();
+        result += "\n" + e.getMessage() + "\n";
         return result;
     }
 
-    /*public ResultSet executeQuery(String query) throws SQLException {
+    private String executeQuery(String query) throws SQLException {
         Statement statement = con.createStatement();
-        return statement.executeQuery(query);
+        ResultSet result = statement.executeQuery(query);
+
+        StringBuilder info = new StringBuilder("");
+        int colNum = result.getMetaData().getColumnCount();
+
+        //put columns headers
+        int i;
+        for (i = 1; i < colNum; i++) {
+            info.append(result.getMetaData().getColumnName(i));
+            info.append(",");
+        }
+        if (i == colNum) {
+            info.append(result.getMetaData().getColumnName(i));
+            info.append("\n");
+        }
+
+        //get each row's data
+        while (result.next()) {
+            for (i = 1; i < colNum; i++) {
+                info.append(result.getString(i));
+                info.append(",");
+            }
+            if (i == colNum){
+                info.append(result.getString(i));
+                info.append("\n");
+            }
+        }
+
+        return info.toString();
     }
 
-    public int executeCommand(String query) throws SQLException {
+    private String executeUpdate(String query) throws SQLException {
         Statement statement = con.createStatement();
-        return statement.executeUpdate(query);
-    }*/
+        return "Rows affected :" + statement.executeUpdate(query) + "\n";
+    }
 }

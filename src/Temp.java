@@ -11,25 +11,11 @@ public class Temp {
         try {
             DBManager manager;
 
-            manager = new DBManager("C:\\Users\\Tomer " +
-                    "Gill\\Documents\\University\\Databases\\DBPoject\\src/conf.txt");
+            manager = new DBManager("C:\\Users\\michal\\IdeaProjects\\DBPoject\\src\\conf.txt");
 
 
 //            ResultSet set;
-            System.out.println(manager.DMLQuery("SELECT * FROM students WHERE id = 0"));
-
-//            System.out.println("*********************");
-//            System.out.println(set);
-//            System.out.println("*********************\n");
-//
-//            int cols = set.getMetaData().getColumnCount();
-//
-//            while (set.next()) {
-//                for (int i = 1; i < cols; i++) {
-//                    System.out.printf(set.getString(i) + ", ");
-//                }
-//                System.out.printf(set.getString(cols) + "\n");
-//            }
+            System.out.println(manager.executeScript("C:\\Users\\michal\\IdeaProjects\\DBPoject\\src\\script.txt"));
         } catch (Exception e) {
             System.out.println(e.toString());
         }
