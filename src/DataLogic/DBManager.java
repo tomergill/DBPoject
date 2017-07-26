@@ -14,13 +14,21 @@ import java.sql.DriverManager;
 import java.util.Scanner;
 
 /**
- * Created by Tomer Gill on 06-Jul-17.
+ * Class for querying a remote DB using SQL.
+ * Please look at IDBManager's javadoc for format explaining.
  */
 public class DBManager implements IDBManager {
-    private Connection con;
-    private static List<String> DDLReturnAnswer = null;
-    private static List<String> DMLAffectingRows = null;
+    private Connection con; //DB connection
+    private static List<String> DDLReturnAnswer = null; //DML commands returning table as answer
+    private static List<String> DMLAffectingRows = null; //DDL commands returning no. of rows affe.
 
+    /**
+     * Ctor - Opens a connection to the DB and inserts commands to the static lists.
+     * @param path Path to the config file, consisting of 3 lines: URL of the DB (server's
+     *             adress, db name and port), User name and Password.
+     * @throws IOException Error opening the config file.
+     * @throws SQLException Error opening the connection.
+     */
     public DBManager(String path) throws IOException, SQLException {
         BufferedReader reader = new BufferedReader(new FileReader(path));
         String url = reader.readLine();
@@ -42,6 +50,12 @@ public class DBManager implements IDBManager {
         }
     }
 
+    /**
+     * Executes a DML query/update to the DB.
+     * @param query The query to execute on the DB.
+     * @return Either a table, the number of rows affected or an error message, in the format
+     *      specified in the interface's javadoc.
+     */
     @Override
     public String DMLQuery(String query) {
         boolean answer = false;
@@ -62,6 +76,12 @@ public class DBManager implements IDBManager {
         }
     }
 
+    /**
+     * Executes a DDL query/update to the DB.
+     * @param query The query to execute on the DB.
+     * @return Either a table, the number of rows affected or an error message, in the format
+     *      specified in the interface's javadoc.
+     */
     @Override
     public String DDLQuery(String query) {
 
@@ -85,6 +105,10 @@ public class DBManager implements IDBManager {
         }
     }
 
+    /**
+     * Closes the connection to the DB.
+     * @return true if the connection closed successfully, otherwise returns false.
+     */
     @Override
     public boolean closeConnection() {
         try {
@@ -97,6 +121,12 @@ public class DBManager implements IDBManager {
         }
     }
 
+    /**
+     * Executes the script query by query.
+     * @param scriptPath Path to script file to read from.
+     * @return A list of answers, one answer to each query in the script file.
+     * @throws IOException In case opening the script is unsuccessful.
+     */
     @Override
     public List<String> executeScript(String scriptPath) throws IOException {
         Scanner scanner = new Scanner(new File(scriptPath));
@@ -121,6 +151,11 @@ public class DBManager implements IDBManager {
         return answer;
     }
 
+    /**
+     * Formatting an exception to an error message.
+     * @param e Exception to format.
+     * @return The error message from the exception, in the interface's format.
+     */
     private String errMsgFromException(SQLException e) {
         String result;
         if (e.toString().contains("syntax"))
@@ -132,6 +167,12 @@ public class DBManager implements IDBManager {
         return result;
     }
 
+    /**
+     * Execute a query - returns a table in the format specified in the interface's javadoc.
+     * @param query Query to execute.
+     * @return The table returned by the DB.
+     * @throws SQLException If there was an error in the query.
+     */
     private String executeQuery(String query) throws SQLException {
         Statement statement = con.createStatement();
         ResultSet result = statement.executeQuery(query);
@@ -165,6 +206,13 @@ public class DBManager implements IDBManager {
         return info.toString();
     }
 
+    /**
+     * Execute an update to the table - returns the number of rows affected in the format specified
+     *      in the interface's javadoc.
+     * @param query Query to execute.
+     * @return The number of affected rows returned by the DB.
+     * @throws SQLException If there was an error in the query.
+     */
     private String executeUpdate(String query) throws SQLException {
         Statement statement = con.createStatement();
         return "Rows affected :" + statement.executeUpdate(query) + "\n";
